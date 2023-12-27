@@ -6,7 +6,7 @@
 /*   By: seokjyan <seokjyan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/27 17:27:56 by seokjyan          #+#    #+#             */
-/*   Updated: 2023/12/27 20:57:58 by seokjyan         ###   ########.fr       */
+/*   Updated: 2023/12/27 21:14:59 by seokjyan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,18 @@
 
 // libft 대체 함수 strcmp
 
+int ft_redirection_in(int fd, char **args, int i)
+{
+    if((fd = open(args[i + 1], O_WRONLY|O_CREAT|O_TRUNC, 0644)) == -1)
+    {
+		perror("open");
+        return (EXIT_FAILURE);
+	}
+	dup2(fd, 1);
+	close(fd);
+	args[i] = 0;
+    return (EXIT_SUCCESS);
+}
 
 int ft_redirection_out(int fd, char **args, int i, int flag)
 {
@@ -22,7 +34,7 @@ int ft_redirection_out(int fd, char **args, int i, int flag)
         if ((fd = open(args[i + 1], O_WRONLY|O_CREAT|O_TRUNC, 0644)) == -1)
         {
             perror("open");
-            return;
+            return (EXIT_FAILURE);
         }
     }
     else
@@ -30,12 +42,13 @@ int ft_redirection_out(int fd, char **args, int i, int flag)
         if ((fd = open(args[i + 1], O_WRONLY|O_CREAT|O_APPEND, 0644)) == -1)
         {
             perror("open");
-            return;
+            return (EXIT_FAILURE);
         }
     }
     dup2(fd, 1);
     close(fd);
     args[i] = 0;
+    return (EXIT_SUCCESS);
 }
 
 
@@ -52,9 +65,9 @@ int is_redirect(char **args)
         if (strcmp(args[i], ">>") == 0)
             ft_redirection_out(fd, args, i, append);
         if ((strcmp(args[i], "0<") == 0) || (strcmp(args[i], "<") == 0))
-            ft_redirection_in();
+            ft_redirection_in(fd, args, i);
         if (strcmp(args[i], ">>") == 0)
-            ft_redirection_in();
+            ft_here_document();
         if (strcmp(args[i], "2>") == 0)
             ft_redirection_err();
     }
