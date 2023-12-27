@@ -28,25 +28,19 @@ typedef struct s_comm
 	int				length;
 	int				type;
 	int				pipes[2];
-	struct s_list	*prev;
-	struct s_list	*next;
+	struct s_comm	*prev;
+	struct s_comm	*next;
 } t_comm;
 
-#define SIDE_OUT	0
-#define SIDE_IN		1
-
-#define STDIN		0
-#define STDOUT		1
-#define STDERR		2
-
-#define TYPE_END	0
-#define TYPE_PIPE	1
-#define TYPE_BREAK	2
+#define STR 0
+#define PIP 1
+#define RED 2
 
 /* tokenize */
-void split_line(char *line);
+void split_line(char *line, t_comm **cmd);
 char *mk_strdup(int start, int end, char *line);
 void process_env_var(char **token);
+void init_list(t_comm **cmd, char *token, int type);
 
 int is_space(char a);
 int is_dquotes(char a);

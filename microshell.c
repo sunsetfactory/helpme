@@ -96,7 +96,7 @@ int is_env(char a)
 }
 
 
-int tokenizing(char *line)
+int tokenizing(char *line, t_comm **cmd)
 {
 	char *buf = (char *)malloc(sizeof(char) * strlen(line) + 1);
 	bzero(buf, strlen(line) + 1);
@@ -127,17 +127,30 @@ int tokenizing(char *line)
 		i++;
 	}
 	printf("%s\n", buf);
-	split_line(line);
+	split_line(line, cmd);
 	return 1;
 }
 
-void read_input(t_comm *cmd)
+void read_input(t_comm **cmd)
 {
 	char *read = readline("minishell$ ");
 	printf("%s\n", read);
-	tokenizing(read);
+	tokenizing(read, cmd);
 	add_history(read);
 	free(read);
+}
+
+void free_list(t_comm *cmd)
+{
+    t_comm *temp;
+
+    while (cmd != NULL) {
+        temp = cmd;      // 현재 노드를 임시 변수에 저장
+        cmd = cmd->next; // 다음 노드로 이동
+
+        free(temp->token); // 노드의 token 메모리 해제
+        free(temp);        // 노드 자체의 메모리 해제
+    }
 }
 
 
@@ -145,11 +158,12 @@ int main(int argc, char **argv)
 {
 	t_comm *cmd;
 
-	cmd = (t_comm *)malloc(sizeof(t_comm));
-
 	while(1)
 	{
-		read_input(cmd);
+		read_input(&cmd);
+		free_list(cmd);
+		cmd = malloc(sizeof(t_comm));
+		cmd = NULL;
 	}
 
 }

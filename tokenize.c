@@ -6,14 +6,22 @@
 /*   By: minkylee <minkylee@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/15 20:33:37 by minkylee          #+#    #+#             */
-/*   Updated: 2023/12/27 21:00:59 by minkylee         ###   ########.fr       */
+/*   Updated: 2023/12/27 22:04:16 by minkylee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "microshell.h"
 
-/* 문자열에서 start ~ end 확인 */
+void print(t_comm *cmd)
+{
+	while (cmd)
+	{
+		printf("token : %s\n", cmd->token);
+		cmd = cmd->next;
+	}
+}
 
+/* start ~ end 까지의 문자열 반환하는 함수 */
 char *mk_strdup(int start, int end, char *line)
 {
     char *new_line;
@@ -33,7 +41,7 @@ char *mk_strdup(int start, int end, char *line)
     return new_line;
 }
 
-char *find_delimited(char *token)
+char *find_delimited(char *token, t_comm **cmd)
 {
     int i = 0;
     int start = i;
@@ -49,7 +57,7 @@ char *find_delimited(char *token)
             if (i > start)
             {
                 new_token = mk_strdup(start, i - 1, token);
-                printf("1token : %s\n", new_token);
+                init_list(cmd, new_token, STR);
                 free(new_token);
             }
 
@@ -57,14 +65,15 @@ char *find_delimited(char *token)
             if ((token[i] == '<' || token[i] == '>') && token[i + 1] == token[i])
             {
                 new_token = mk_strdup(i, i + 1, token);
+				init_list(cmd, new_token, RED);
                 i += 2;
             }
             else
             {
                 new_token = mk_strdup(i, i, token);
+				init_list(cmd, new_token, RED);
                 i++;
             }
-            printf("2token : %s\n", new_token);
             free(new_token);
             start = i;
         }
@@ -93,7 +102,6 @@ char *process_dquo(char *line, int start)
 		}
         end++;
     }
-	process_env_var(&token);
     return token;
 }
 
@@ -113,39 +121,67 @@ char *process_squo(char *line, int start)
     return NULL;
 }
 
-void split_line(char *line)
+void init_list(t_comm **cmd, char *token, int type)
+{
+    t_comm *push = (t_comm *)malloc(sizeof(t_comm));
+    if (!push) return;  // 메모리 할당 확인
+
+    // 새 노드 초기화
+    push->token = strdup(token);  // 토큰 복사하여 저장
+    push->length = ft_strlen(token);
+    push->type = type;
+    push->next = NULL;
+
+    // 리스트의 끝을 찾고 새 노드 추가
+    if (*cmd == NULL) {
+        *cmd = push;
+    } else {
+        t_comm *temp = *cmd;
+        while (temp->next)
+            temp = temp->next;
+        temp->next = push;
+    }
+}
+
+/* 문자를 나눠용 */
+void split_line(char *line, t_comm **cmd)
 {
 	int i = 0;
 	int token_index = 0;
 	char *quote_temp;
 	char *temp = (char *)malloc(sizeof(char) * strlen(line) + 1);
 	char *token;
+	t_comm **head = cmd;
 	bzero(temp, strlen(line) + 1);
 
 	while (line[i])
 	{
 		if (is_space(line[i]) || line[i + 1] == '\0')
 		{
+			if (!is_space(line[i]) && line[i + 1] == '\0') 
+                temp[token_index++] = line[i];  // 마지막 글자 추가
 			token = mk_strdup(0, token_index, temp);
 			bzero(temp, strlen(line) + 1);
 			token_index = 0;
-			printf("token : %s\n", token);
+			init_list(cmd, token, STR);
 			free(token);
 			i++;
 			continue;
 		}
 		else if (is_squotes(line[i]))
 		{
-			quote_temp = process_squo(line, i);
-			temp = ft_strjoin(find_delimited(temp), quote_temp);
+			quote_temp = ft_strjoin(find_delimited(temp, cmd), process_squo(line, i));
+			bzero(temp, ft_strlen(quote_temp) + 1);
+			ft_strlcat(temp, quote_temp, ft_strlen(quote_temp) + 1);
 			i += ft_strlen(quote_temp);
 			token_index += ft_strlen(quote_temp);
 			free(quote_temp);
 		}
 		else if (is_dquotes(line[i]))
 		{
-			quote_temp = process_dquo(line, i);
-			temp = ft_strjoin(find_delimited(temp), quote_temp);
+			quote_temp = ft_strjoin(find_delimited(temp, cmd), process_dquo(line, i));
+			bzero(temp, ft_strlen(quote_temp) + 1);
+			ft_strlcat(temp, quote_temp, ft_strlen(quote_temp) + 1);
 			i += ft_strlen(quote_temp);
 			token_index += ft_strlen(quote_temp);
 			free(quote_temp);
@@ -155,6 +191,7 @@ void split_line(char *line)
 		token_index++;
 		i++;
 	}
+	print(*head);
 }
 
 /* 환경변수 값을 대치합니다.*/

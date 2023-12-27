@@ -9,7 +9,7 @@ $(LIBFT):
 	make -C ./Libft
 
 $(NAME): $(OBJS)
-	cc -o $(NAME) $(OBJS) -L./Libft -lft -lreadline
+	cc -g -fsanitize=address -o $(NAME) $(OBJS) -L./Libft -lft -lreadline
 
 .c.o:
 	cc -c $< -o $@
