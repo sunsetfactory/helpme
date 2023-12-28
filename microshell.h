@@ -15,13 +15,6 @@
 
 #include "libft/libft.h"
 
-typedef enum e_state // 내가 쿼트 안에 있는지 확인하는거
-{
-    NORMAL,
-    IN_SINGLE_QUOTE,
-    IN_DOUBLE_QUOTE
-} t_state;
-
 typedef struct s_comm
 {
 	char			*token;

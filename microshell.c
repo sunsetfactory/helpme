@@ -126,7 +126,6 @@ int tokenizing(char *line, t_comm **cmd)
 			buf[i] = 'A';
 		i++;
 	}
-	printf("%s\n", buf);
 	split_line(line, cmd);
 	return 1;
 }
@@ -134,7 +133,6 @@ int tokenizing(char *line, t_comm **cmd)
 void read_input(t_comm **cmd)
 {
 	char *read = readline("minishell$ ");
-	printf("%s\n", read);
 	tokenizing(read, cmd);
 	add_history(read);
 	free(read);

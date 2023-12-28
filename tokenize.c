@@ -6,7 +6,7 @@
 /*   By: minkylee <minkylee@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/15 20:33:37 by minkylee          #+#    #+#             */
-/*   Updated: 2023/12/27 22:04:16 by minkylee         ###   ########.fr       */
+/*   Updated: 2023/12/28 17:25:01 by minkylee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ char *find_delimited(char *token, t_comm **cmd)
             if (i > start)
             {
                 new_token = mk_strdup(start, i - 1, token);
+				process_env_var(&new_token);
                 init_list(cmd, new_token, STR);
                 free(new_token);
             }
@@ -80,11 +81,10 @@ char *find_delimited(char *token, t_comm **cmd)
         else
             i++;
     }
-
-    // 마지막 일반 문자열이 있으면 출력
+    // 마지막 일반 문자열이 있으면 리턴
     if (i > start)
         new_token = mk_strdup(start, i - 1, token);
-	else
+	else // 없으면 빈문자열 리턴
 		new_token = ft_strdup("");
 	return new_token;
 }
@@ -125,9 +125,8 @@ void init_list(t_comm **cmd, char *token, int type)
 {
     t_comm *push = (t_comm *)malloc(sizeof(t_comm));
     if (!push) return;  // 메모리 할당 확인
-
-    // 새 노드 초기화
-    push->token = strdup(token);  // 토큰 복사하여 저장
+ 
+    push->token = strdup(token);
     push->length = ft_strlen(token);
     push->type = type;
     push->next = NULL;
@@ -159,8 +158,9 @@ void split_line(char *line, t_comm **cmd)
 		if (is_space(line[i]) || line[i + 1] == '\0')
 		{
 			if (!is_space(line[i]) && line[i + 1] == '\0') 
-                temp[token_index++] = line[i];  // 마지막 글자 추가
-			token = mk_strdup(0, token_index, temp);
+                temp[token_index++] = line[i];
+			token = find_delimited(temp, cmd);
+			process_env_var(&token);
 			bzero(temp, strlen(line) + 1);
 			token_index = 0;
 			init_list(cmd, token, STR);
@@ -170,21 +170,41 @@ void split_line(char *line, t_comm **cmd)
 		}
 		else if (is_squotes(line[i]))
 		{
-			quote_temp = ft_strjoin(find_delimited(temp, cmd), process_squo(line, i));
-			bzero(temp, ft_strlen(quote_temp) + 1);
-			ft_strlcat(temp, quote_temp, ft_strlen(quote_temp) + 1);
-			i += ft_strlen(quote_temp);
-			token_index += ft_strlen(quote_temp);
-			free(quote_temp);
+			char *delimited = find_delimited(temp, cmd);
+			char *processed = process_squo(line, i);
+
+			i += strlen(processed) + 2;
+			memset(temp, 0, strlen(line));
+			strcat(temp, delimited);
+			strcat(temp, processed);
+			if (!line[i])
+			{
+				init_list(cmd, temp, STR);
+				memset(temp, 0, strlen(line));
+			}
+			token_index = strlen(temp);
+			free(delimited);
+			free(processed);
+			continue;
 		}
 		else if (is_dquotes(line[i]))
 		{
-			quote_temp = ft_strjoin(find_delimited(temp, cmd), process_dquo(line, i));
-			bzero(temp, ft_strlen(quote_temp) + 1);
-			ft_strlcat(temp, quote_temp, ft_strlen(quote_temp) + 1);
-			i += ft_strlen(quote_temp);
-			token_index += ft_strlen(quote_temp);
-			free(quote_temp);
+			char *delimited = find_delimited(temp, cmd);
+			char *processed = process_dquo(line, i);
+
+			i += strlen(processed) + 2;
+			memset(temp, 0, strlen(line));
+			strcat(temp, delimited);
+			strcat(temp, processed);
+			if (!line[i])
+			{
+				init_list(cmd, temp, STR);
+				memset(temp, 0, strlen(line));
+			}
+			token_index = strlen(temp);
+			free(delimited);
+			free(processed);
+			continue;
 		}
 		else
 			temp[token_index] = line[i];
