@@ -1,20 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   ft_isalpha.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: seokjyan <seokjyan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: minkylee <minkylee@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/12/27 16:52:51 by seokjyan          #+#    #+#             */
-/*   Updated: 2023/12/27 17:28:48 by seokjyan         ###   ########.fr       */
+/*   Created: 2023/03/15 17:32:59 by minkylee          #+#    #+#             */
+/*   Updated: 2023/04/07 10:31:27 by minkylee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./minishell.h"
-
-int main(int argc, char** argv)
+int	ft_isalpha(int c)
 {
-	ft_exec();
-	ft_pipe();
+	if (c >= 'a' && c <= 'z')
+		return (1);
+	else if (c >= 'A' && c <= 'Z')
+		return (2);
 	return (0);
 }

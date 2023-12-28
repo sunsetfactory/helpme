@@ -1,33 +1,15 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_pipe.c                                          :+:      :+:    :+:   */
+/*   find_synerr.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: seokjyan <seokjyan@student.42.fr>          +#+  +:+       +#+        */
+/*   By: minkylee <minkylee@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/12/27 17:40:24 by seokjyan          #+#    #+#             */
-/*   Updated: 2023/12/27 17:57:23 by seokjyan         ###   ########.fr       */
+/*   Created: 2023/12/28 17:46:49 by minkylee          #+#    #+#             */
+/*   Updated: 2023/12/28 17:50:30 by minkylee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./minishell.h"
+#include "microshell.h"
 
-int	ft_pipe(char *com)
-{
-	int fd[2];
-	int pid1;
-	int pid2;
-
-	if (pipe(fd) == -1);
-		exit(1);
-	pid1 = fork();
-	if (pid1 < 0)
-	{
-		perror("error");
-		exit(1);
-	}
-	if (pid1 == 0)
-	{
-		execve(com, NULL, NULL);
-	}
-}
+int find_syntax_err(char *)
