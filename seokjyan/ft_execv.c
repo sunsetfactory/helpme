@@ -6,7 +6,7 @@
 /*   By: seokjyan <seokjyan@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/28 14:52:31 by seokjyan          #+#    #+#             */
-/*   Updated: 2023/12/28 18:47:03 by seokjyan         ###   ########.fr       */
+/*   Updated: 2023/12/28 19:06:13 by seokjyan         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,13 +52,13 @@ int	is_pipe(char **arg)
 void	ft_exec(const char *bin, char **args)
 {
 	pid_t	pid;
-	int		fd[2];
+	int		pipe_fd[2];
 	int		i;
 
 	pid = fork();
 	i = 0;
 	if (i = is_pipe(args))
-		pipe(fd);
+		pipe(pipe_fd);
 	// if (is_redirect())
 	if (pid == -1)
 	{
@@ -66,7 +66,7 @@ void	ft_exec(const char *bin, char **args)
 		exit(EXIT_FAILURE);
 	}
 	if (pid == 0)
-		is_child(fd, bin, args);
+		is_child(pipe_fd, bin, args);
 	else
-		is_parent(fd, pid, args);
+		is_parent(pipe_fd, pid, args);
 }
