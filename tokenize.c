@@ -6,7 +6,7 @@
 /*   By: minkylee <minkylee@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/15 20:33:37 by minkylee          #+#    #+#             */
-/*   Updated: 2023/12/28 17:25:01 by minkylee         ###   ########.fr       */
+/*   Updated: 2023/12/28 19:29:57 by minkylee         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,36 +89,53 @@ char *find_delimited(char *token, t_comm **cmd)
 	return new_token;
 }
 
-char *process_dquo(char *line, int start)
+int process_dquo(char *line, int start, char **temp, t_comm **cmd)
 {
     int end = start + 1;
     char *token;
+	char *isolation;
+
+	isolation = find_delimited(*temp, cmd);
     while (line[end])
     {
         if (is_dquotes(line[end]))
+		{
+            token = mk_strdup(start + 1, end - 1, line);
+		}
+        end++;
+    }
+	memset(*temp, 0, strlen(line));
+	strcat(*temp, isolation);
+	strcat(*temp, token);
+	printf("end : %d\nline[end] : %c\n", end, line[end]);
+	if (end == ft_strlen(line))
+	{
+		init_list(cmd, *temp, STR);
+		memset(temp, 0, strlen(line));
+	}
+    return ft_strlen(token) + 2;
+}
+
+int process_squo(char *line, int start, char **temp, t_comm **cmd)
+{
+    int end = start + 1;
+    char *token;
+	char *isolation;
+
+	isolation = find_delimited(*temp, cmd);
+    while (line[end])
+    {
+        if (is_squotes(line[end]))
 		{
             token = mk_strdup(start + 1, end - 1, line);
 			break;
 		}
         end++;
     }
-    return token;
-}
-
-char *process_squo(char *line, int start)
-{
-    int end = start + 1;
-    char *token;
-    while (line[end])
-    {
-        if (line[end] == '\'')
-		{
-            token = mk_strdup(start + 1, end - 1, line);
-			return token;
-		}
-        end++;
-    }
-    return NULL;
+	memset(*temp, 0, strlen(line));
+	strcat(*temp, isolation);
+	strcat(*temp, token);
+    return ft_strlen(token) + 2;
 }
 
 void init_list(t_comm **cmd, char *token, int type)
@@ -170,40 +187,24 @@ void split_line(char *line, t_comm **cmd)
 		}
 		else if (is_squotes(line[i]))
 		{
-			char *delimited = find_delimited(temp, cmd);
-			char *processed = process_squo(line, i);
-
-			i += strlen(processed) + 2;
-			memset(temp, 0, strlen(line));
-			strcat(temp, delimited);
-			strcat(temp, processed);
+			i += process_squo(line, i, &temp, cmd);
 			if (!line[i])
 			{
 				init_list(cmd, temp, STR);
 				memset(temp, 0, strlen(line));
 			}
 			token_index = strlen(temp);
-			free(delimited);
-			free(processed);
 			continue;
 		}
 		else if (is_dquotes(line[i]))
 		{
-			char *delimited = find_delimited(temp, cmd);
-			char *processed = process_dquo(line, i);
-
-			i += strlen(processed) + 2;
-			memset(temp, 0, strlen(line));
-			strcat(temp, delimited);
-			strcat(temp, processed);
-			if (!line[i])
-			{
-				init_list(cmd, temp, STR);
-				memset(temp, 0, strlen(line));
-			}
+			i += process_dquo(line, i, &temp, cmd);
+			// if (!line[i])
+			// {
+			// 	init_list(cmd, temp, STR);
+			// 	memset(temp, 0, strlen(line));
+			// }
 			token_index = strlen(temp);
-			free(delimited);
-			free(processed);
 			continue;
 		}
 		else

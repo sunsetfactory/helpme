@@ -1,5 +1,5 @@
 NAME = minishell
-SRCS = tokenize.c microshell.c
+SRCS = tokenize.c microshell.c find_synerr.c
 OBJS = $(SRCS:.c=.o)
 LIBFT = ./Libft/libft.a
 

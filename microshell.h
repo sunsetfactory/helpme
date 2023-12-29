@@ -29,15 +29,21 @@ typedef struct s_comm
 #define PIP 1
 #define RED 2
 
+#define SYNTAX_ERR 258
+
 /* tokenize */
 void split_line(char *line, t_comm **cmd);
 char *mk_strdup(int start, int end, char *line);
 void process_env_var(char **token);
 void init_list(t_comm **cmd, char *token, int type);
 
+int process_dquo(char *line, int start, char **temp, t_comm **cmd);
+
 int is_space(char a);
 int is_dquotes(char a);
 int is_squotes(char a);
 int is_del(char *line);
+
+int find_syntax_err(char *buf);
 
 #endif

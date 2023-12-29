@@ -4,7 +4,6 @@
 /*
 	미니쉘 구현 계획
 	1. 토큰 분리 규칙에 따라서 나누기
-	
 */
 
 
@@ -16,12 +15,7 @@
 	q : 싱글쿼트
 	r : 리다이렉트 >
 	D : 달러표시
-	l : 리터럴
 	s : 문자열
-
-	a : >> appending
-	i : < input
-	h : << here doc
 */
 
 int is_del(char *line)
@@ -44,15 +38,6 @@ int is_space(char a)
 	return 0;
 }
 
-int is_alpha(char a)
-{
-	if (a >= 'a' && a <= 'z')
-		return 1;
-	else if (a >= 'A' && a <= 'A')
-		return 1;
-	return 0;
-}
-
 int is_dquotes(char a)
 {
 	if (a == '"')
@@ -69,14 +54,7 @@ int is_squotes(char a)
 
 int is_redirect(char a)
 {
-	if (a == '<')
-		return 1;
-	return 0;
-}
-
-int is_input(char a)
-{
-	if (a == '>')
+	if (a == '<' || a == '>')
 		return 1;
 	return 0;
 }
@@ -106,8 +84,6 @@ int tokenizing(char *line, t_comm **cmd)
 	{
 		if (is_space(line[i]))
 			buf[i] = 'S';
-		else if (is_alpha(line[i]))
-			buf[i] = 'A';
 		else if (is_dquotes(line[i]))
 			buf[i] = 'Q';
 		else if (is_squotes(line[i]))
@@ -118,24 +94,31 @@ int tokenizing(char *line, t_comm **cmd)
 			buf[i] = 'r';
 		else if(line[i] == '$')
 			buf[i] = 'D';
-		else if (line[i] == '\\')
-			buf[i] = 'l';
-		else if (is_input(line[i]))
-			buf[i] = 'i';
 		else
 			buf[i] = 'A';
 		i++;
+	}
+	if (!find_syntax_err(buf))
+	{
+		free(buf);
+		return 1;
 	}
 	split_line(line, cmd);
 	return 1;
 }
 
-void read_input(t_comm **cmd)
+int read_input(t_comm **cmd)
 {
 	char *read = readline("minishell$ ");
-	tokenizing(read, cmd);
+	if (!tokenizing(read, cmd))
+	{
+		add_history(read);
+		free(read);
+		return 0;
+	}
 	add_history(read);
 	free(read);
+	return 1;
 }
 
 void free_list(t_comm *cmd)
@@ -158,7 +141,8 @@ int main(int argc, char **argv)
 
 	while(1)
 	{
-		read_input(&cmd);
+		if (!read_input(&cmd))
+			continue;
 		free_list(cmd);
 		cmd = malloc(sizeof(t_comm));
 		cmd = NULL;
